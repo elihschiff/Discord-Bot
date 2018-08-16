@@ -3,7 +3,7 @@ const http = require('http');
 const express = require('express');
 const app = express();
 app.get("/", (request, response) => {
-  console.log(Date.now() + " Ping Received");
+  // console.log(Date.now() + " Ping Received");
   response.sendStatus(200);
 });
 app.listen(process.env.PORT);
@@ -40,6 +40,8 @@ client.on('ready', () => {
   })
   .then(presence => console.log(`Activity set to ${presence.game ? presence.game.name : 'none'}`))
   .catch(console.error);
+  
+  
 });
 
 
@@ -54,6 +56,12 @@ client.on('message', msg => {
       msg.channel.send('f');
     }
   }
+  
+  if (msg.content.toLowerCase() === 'echo') {
+    if (msg.author.username != "Mom Bot" && msg.author.username != "Tester Bot" && msg.author.bot == false) {
+      msg.channel.send('echo');
+    }
+  }
 
   //Mom Bot is a person of faith
   if (msg.content.toLowerCase().includes("christian server")) {
@@ -62,10 +70,10 @@ client.on('message', msg => {
     }
   }
 
-  //Randomly when somebody mentions RPI (the college) Mom Bot makes a joke about how RPI is close to RIP
+  //Randomly when somebody mentions RPI (my college) Mom Bot makes a joke about how RPI is close to RIP
   if (msg.content.toLowerCase().includes("rpi")) {
     if (msg.author.username != "Mom Bot" && msg.author.username != "Tester Bot") {
-      if (Math.floor(Math.random() * 10) == 3) {
+      if (Math.floor(Math.random() * 100) == 3) {
         msg.channel.send("RPI more like RIP you wallet :coffin: :money_mouth: :moneybag: <https://www.cbsnews.com/pictures/the-50-most-expensive-us-colleges/28/>");
       }
     }
@@ -81,7 +89,7 @@ client.on('message', msg => {
   }
 
   //Finds a random gif for a given topic
-  //Example: "!gif book" returns a random gif relating to a book
+  //Example: "!gif cute dog" returns a random gif relating to a book
   if (msg.content.toLowerCase().startsWith("!gif ")) {
     var request = require("request")
     var url = "http://api.giphy.com/v1/gifs/random?api_key=" + process.env.GIF_API_KEY + "&rating=pg-13&tag="
@@ -134,25 +142,6 @@ client.on('message', msg => {
     })
   }
 
-  //Responds with a yo mamma joke
-  //Example: "!yo mamma" with a joke
-  if (msg.content.toLowerCase() == ("yo momma") || msg.content.toLowerCase() == ("yo mama")) {
-    var request = require("request")
-    var yomomaJokeUrl = "http://api.yomomma.info/"
-    request({
-      url: yomomaJokeUrl,
-      json: true
-    }, function(error, response, body) {
-      if (!error && response.statusCode === 200) {
-        // console.log(body) // Print the json response
-        try {
-          var joke = body.joke.toString()
-          joke = "so fat" + joke.substring(joke.indexOf("so fat") + "so fat".length);
-          msg.channel.send(joke);
-        } catch (e) {}
-      }
-    })
-  }
 
   //Gets info on the next rocket launch from around the world
   //Example: "!launch" responds with a date, type of rocket, and payload for the next rocket launch
@@ -215,7 +204,7 @@ client.on('message', msg => {
     })
   }
 
-  //Randomly responds to "Dad Bot" which is another bot on the server this bot was designed for. This command randomly responds to a joke sometimes told by "Dad Bot"
+  //Randomly responds to "Dad Bot". Dad Bot is another bot on the RPI server. This will sometimes responds to a joke told by "Dad Bot"
   if (msg.content.startsWith("Hi ")) {
     if (msg.author.username == "Dad Bot") {
       if (Math.floor(Math.random() * 10) == 3) {
@@ -233,7 +222,9 @@ client.on('message', msg => {
 
 
   //Gets the definition for a word from urban dictionary
-  //Example:
+  //Example: "!def" responds with a random word and definition
+  //Example: "!def book" responds with the definition for apple
+  //Example: "!def:3 book" responds with the 3rd definition for apple
   if (msg.content.toLowerCase().startsWith("!def") || msg.content.toLowerCase().startsWith("!define")) {
     const ud = require('urban-dictionary')
 
@@ -256,20 +247,29 @@ client.on('message', msg => {
           msg.channel.send(msgToSend)
         }
       })
-    } else {
-
-      ud.term(definition, function(error, entries, tags, sounds) {
-        if (!error) {
-
-          if(number-1> entries.length || number<0){
-            number = 0;
-          }
-
-          var msgToSend = '**According to Urban Dictionary "' + entries[number].word + '" means:**\n\n' + entries[number].definition + '\n\n***' + entries[number].example + '***'
-          msgToSend = msgToSend.substring(0, 1999);
-          msg.channel.send(msgToSend)
-        } else {
-          msg.channel.send('Sorry I could not find a definition for "' + definition + '"');
+    } else {      
+      
+      var request = require("request")
+      var URL = "http://api.urbandictionary.com/v0/define?term=" + definition
+      
+      request({
+        url: URL,
+        json: true
+      }, function(error, response, body) {
+        if (!error && response.statusCode === 200) {
+          try {
+        
+            if(number-1 > body.list.length || number < 0){
+              number = 0;
+            }
+            
+            var msgToSend = '**According to Urban Dictionary "' + body.list[number].word + '" means:**\n\n' + body.list[number].definition + '\n\n***' + body.list[number].example + '***'
+            msgToSend = msgToSend.substring(0, 1999);
+            msg.channel.send(msgToSend)
+            
+          } catch (e) {}
+        }else{
+          msg.channel.send('Sorry I could not find a definition for "' + definition + '"');  
         }
       })
     }
@@ -277,8 +277,8 @@ client.on('message', msg => {
 
   //Gets top posts from reddit
   //Example: "!reddit" responds with the current top post all of reddit
-  //Example: "!reddit apple" responds with the current top post on the apple subreddit
-  //Example: "!reddit:5 apple" responds with the current 5th post on the apple subreddit
+  //Example: "!reddit pic" responds with the current top post and picture on the pic subreddit
+  //Example: "!reddit:5 pic" responds with the current 5th post and picture on the pic subreddit
   if (msg.content.toLowerCase().startsWith("!reddit")) {
     if(msg.content.indexOf(' ') ==  -1){
       var number = msg.content.substring(msg.content.indexOf(':') + 1,msg.content.length)
@@ -326,6 +326,7 @@ client.on('message', msg => {
       }
     })
   }
+  
 
 
   if (msg.toString().startsWith(secretMessageCode)) {
@@ -394,6 +395,43 @@ client.on('message', msg => {
       msg.channel.send(msgToSend);
     })
   }
+  
+    //Responds with a yo mamma joke
+    //Example: "yo mamma" with a joke
+    if (msg.content.toLowerCase() == ("yo momma") || msg.content.toLowerCase() == ("yo mama")) {
+      var request = require("request")
+      var yomomaJokeUrl = "http://api.yomomma.info/"
+      request({
+        url: yomomaJokeUrl,
+        json: true
+      }, function(error, response, body) {
+        if (!error && response.statusCode === 200) {
+          // console.log(body) // Print the json response
+          try {
+            var joke = body.joke.toString()
+            joke = "so fat" + joke.substring(joke.indexOf("so fat") + "so fat".length);
+            msg.channel.send(joke);
+          } catch (e) {}
+        }
+      })
+    }
+  
+  
+//   if (msg.content.toLowerCase().startsWith("@someone")) {
+//     if (msg.author.username != "Mom Bot" && msg.author.username != "Tester Bot") {
+//       var queryString = msg.content.substring(msg.content.indexOf(' ') + 1)
+
+      
+      
+//       var chan = client.channels//[msg.channel.id]
+//       // var members = chan.members;
+//       console.log(chan)
+      
+      
+      
+//       console.log(queryString)
+//   }
+// }
 
 
 
