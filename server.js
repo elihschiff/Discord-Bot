@@ -49,6 +49,26 @@ client.on('ready', () => {
 //Code runs whenever a message is sent in the chat
 client.on('message', msg => {
 
+  
+  if(msg.channel.type == "dm" && msg.channel.id == process.env.MY_ID){
+    var id = process.env.DEFAULT_ID
+    var msgToSend = msg.content
+    var getChannel  = /^\d{18}\ /
+    var getUser  = /\@\d{18}\b/
+
+    if(msgToSend.match(getChannel)){
+      id = msgToSend.match(getChannel)[0].trim()
+      msgToSend = msgToSend.replace(getChannel,'');
+    }
+    
+    msgToSend = msgToSend.replace(getUser, function(theString){
+      return "<" + theString + ">"
+    })
+    console.log(msgToSend)
+    
+    client.channels.get(id).send(msgToSend);
+  }
+
 
   //Mom Bot will reply F to pay her respects
   if (msg.content.toLowerCase() === 'f') {
@@ -85,6 +105,22 @@ client.on('message', msg => {
       //if (Math.floor(Math.random() * 2) == 1) {
         msg.channel.send("As your mom I just want to remind you that peer pressure is not nice. If you keep this up I will have no choice but to take away the internets from you.");
       //}
+    }
+  }
+  
+  if (msg.content.toLowerCase().includes("go fuck yourself")) {
+    if (msg.author.username != "Mom Bot" && msg.author.username != "Tester Bot") {
+      if (Math.floor(Math.random() * 1) == 1) {
+        msg.channel.send("Please stop cursing on my christian server");
+      }
+    }
+  }
+  
+  if (msg.content.toLowerCase().startsWith("ping")) {
+    if (msg.author.username != "Mom Bot" && msg.author.username != "Tester Bot") {
+      if (Math.floor(Math.random() * 10) == 1) {
+        msg.channel.send("Pong");
+      }
     }
   }
 

@@ -2,7 +2,7 @@
 This is a Discord Bot I made for a discord server of people I am going to college with. While this bot is specifically designed with the needs of that server in mind, the bot can work with any discord server.
 
 ## Demo:
-[Here is a video of the bot in action](https://www.youtube.com)
+[Here are some pictures showing the bot responding to commands](https://photos.app.goo.gl/ywsSa31638HXj6kf6)
 
 ## Features:
 * Get a random gif for a specific topic
