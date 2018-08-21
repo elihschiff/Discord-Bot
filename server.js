@@ -41,7 +41,9 @@ client.on('ready', () => {
   .then(presence => console.log(`Activity set to ${presence.game ? presence.game.name : 'none'}`))
   .catch(console.error);
   
-  
+  // var users = client.guilds.get(process.env.DEFAULT_SERVER).members.array()
+  // console.log(users[0].user.username)
+  // console.log(users[Math.floor(Math.random() * users.length)].id)
 });
 
 
@@ -64,8 +66,25 @@ client.on('message', msg => {
     msgToSend = msgToSend.replace(getUser, function(theString){
       return "<" + theString + ">"
     })
-    console.log(msgToSend)
     
+    var getUserNoId  = /@(.*?)~/g
+    msgToSend = msgToSend.replace(getUserNoId, function(theName){
+      var users = client.guilds.get(process.env.DEFAULT_SERVER).members.array()
+      var theName2 = theName.substring(0, theName.length - 1);
+      for(var i=0;i<users.length;i++){
+        // console.log(theName2 + " " + users[i].nickname + " " + users[i].user.username)
+        if("@" + users[i].nickname == theName2 || "@" + users[i].user.username == theName2){
+          console.log("<@" + users[i].id + ">")
+          return "<@" + users[i].id + ">"
+        }
+      }
+      // return "<@"+users[Math.floor(Math.random() * users.length)].id+">" 
+      
+      return theName2
+    })
+    
+    
+    console.log(msgToSend)
     client.channels.get(id).send(msgToSend);
   }
 
@@ -453,21 +472,20 @@ client.on('message', msg => {
     }
   
   
-//   if (msg.content.toLowerCase().startsWith("@someone")) {
-//     if (msg.author.username != "Mom Bot" && msg.author.username != "Tester Bot") {
-//       var queryString = msg.content.substring(msg.content.indexOf(' ') + 1)
-
+  
+if (msg.content.toLowerCase().startsWith("@someone")) {
+    if (msg.author.username != "Mom Bot" && msg.author.username != "Tester Bot") {
+      var queryString = msg.content
+      var removeSomeone  = /\@someone/g
+      var users = client.guilds.get(process.env.DEFAULT_SERVER).members.array()
       
+        queryString = queryString.replace(removeSomeone,function(){
+          return "<@"+users[Math.floor(Math.random() * users.length)].id+">" 
+        });
       
-//       var chan = client.channels//[msg.channel.id]
-//       // var members = chan.members;
-//       console.log(chan)
-      
-      
-      
-//       console.log(queryString)
-//   }
-// }
+      msg.channel.send(queryString);
+  }
+}
 
 
 
